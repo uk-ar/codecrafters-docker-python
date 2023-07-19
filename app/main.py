@@ -3,6 +3,11 @@ import sys
 import os
 import shutil
 import ctypes
+import requests
+
+#from . import pull
+#import app.pull
+import tarfile
 
 # 名前空間の種類を表すフラグ
 CLONE_NEWNS = 0x00020000  # マウント名前空間
@@ -19,7 +24,13 @@ def main():
 
     # Uncomment this block to pass the first stage
     #
-    
+    name, reference = sys.argv[2].split(":")
+
+    layers = app.pull(name,reference)
+    for layer in layers:
+        with tarfile.open(layer,'r:gz') as tar:
+            tar.extraall(path='./tmp')
+
     command = sys.argv[3]
     args = sys.argv[4:]
 

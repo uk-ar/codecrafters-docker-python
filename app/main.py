@@ -23,7 +23,7 @@ def main():
 
     # Uncomment this block to pass the first stage
     #
-    print(sys.argv)
+    #print(sys.argv)
     name, *reference = sys.argv[2].split(":")
     if not reference:
         reference = "latest"
@@ -36,7 +36,7 @@ def main():
     command = sys.argv[3]
     args = sys.argv[4:]
 
-    print("./tmp"+os.path.dirname(command))
+    #print("./tmp"+os.path.dirname(command))
     os.makedirs("./tmp"+os.path.dirname(command),exist_ok=True)
     #shutil.copy2(command,"./tmp"+command)
 

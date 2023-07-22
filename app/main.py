@@ -3,10 +3,9 @@ import sys
 import os
 import shutil
 import ctypes
-import requests
 
 #from . import pull
-#import app.pull
+import app.pull
 import tarfile
 
 # 名前空間の種類を表すフラグ
@@ -24,32 +23,35 @@ def main():
 
     # Uncomment this block to pass the first stage
     #
-    name, reference = sys.argv[2].split(":")
+    print(sys.argv)
+    name, *reference = sys.argv[2].split(":")
+    if not reference:
+        reference = "latest"
 
-    layers = app.pull(name,reference)
+    layers = app.pull.docker_pull(name,reference)
     for layer in layers:
         with tarfile.open(layer,'r:gz') as tar:
-            tar.extraall(path='./tmp')
+            tar.extractall(path='./tmp')
 
     command = sys.argv[3]
     args = sys.argv[4:]
 
-    os.mkdir("./tmp")
-    os.makedirs("./tmp"+os.path.dirname(command))
-    shutil.copy2(command,"./tmp"+command)
+    print("./tmp"+os.path.dirname(command))
+    os.makedirs("./tmp"+os.path.dirname(command),exist_ok=True)
+    #shutil.copy2(command,"./tmp"+command)
 
     # unshareシステムコールを呼び出す
     libc = ctypes.CDLL('libc.so.6')
     result = libc.unshare(CLONE_NEWPID)
 
-    if result != 0:
-        raise OSError(ctypes.get_errno())
+    #if result != 0:
+    #    raise OSError(ctypes.get_errno())
 
     completed_process = subprocess.run(["chroot","./tmp",command, *args], capture_output=True)
     print(completed_process.stdout.decode("utf-8"), end="")
     print(completed_process.stderr.decode("utf-8"), file=sys.stderr, end="")
 
-    shutil.rmtree("./tmp")
+    #shutil.rmtree("./tmp")
     exit(completed_process.returncode)    
 
 if __name__ == "__main__":
